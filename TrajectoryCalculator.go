@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package ballistics
 
 import (
 	"math"
@@ -13,32 +13,31 @@ const cMaximumDrop float64 = -15000
 const cMaxIterations int = 10
 const cGravityConstant float64 = -32.17405
 
-//TrajectoryCalculator table is used to calculate the trajectory of a projectile shot with the parameters specified
+// TrajectoryCalculator table is used to calculate the trajectory of a projectile shot with the parameters specified
 type TrajectoryCalculator struct {
 	maximumCalculatorStepSize unit.Distance
 }
 
-//MaximumCalculatorStepSize returns the maximum size of one calculation iteration.
+// MaximumCalculatorStepSize returns the maximum size of one calculation iteration.
 func (v TrajectoryCalculator) MaximumCalculatorStepSize() unit.Distance {
 	return v.maximumCalculatorStepSize
 }
 
-//SetMaximumCalculatorStepSize sets the maximum size of one calculation iteration.
+// SetMaximumCalculatorStepSize sets the maximum size of one calculation iteration.
 //
-//As the generic rule, the maximum step of the calculation must not be greater than
-//a half of the step used in the short parameter. The smaller value is, the calculation is more precise but
-//takes more time to calculate. From practical standpoint the value in range from 0.5 to 5 feet produces
-//good enough accuracy.
+// As the generic rule, the maximum step of the calculation must not be greater than
+// a half of the step used in the short parameter. The smaller value is, the calculation is more precise but
+// takes more time to calculate. From practical standpoint the value in range from 0.5 to 5 feet produces
+// good enough accuracy.
 func (v *TrajectoryCalculator) SetMaximumCalculatorStepSize(x unit.Distance) {
 	v.maximumCalculatorStepSize = x
 }
 
 func (v TrajectoryCalculator) getCalculationStep(step float64) float64 {
-	step = step / 2 //do it twice for increased accuracy of velocity calculation and 10 times per step
+	step = step / 2 // do it twice for increased accuracy of velocity calculation and 10 times per step
 
 	var maximumStep float64 = v.maximumCalculatorStepSize.In(unit.DistanceFoot)
 	if step > maximumStep {
-
 		var stepOrder = int(math.Floor(math.Log10(step)))
 		var maximumOrder = int(math.Floor(math.Log10(maximumStep)))
 
@@ -47,28 +46,28 @@ func (v TrajectoryCalculator) getCalculationStep(step float64) float64 {
 	return step
 }
 
-//CreateTrajectoryCalculator creates and instance of the trajectory calculator
+// CreateTrajectoryCalculator creates and instance of the trajectory calculator
 func CreateTrajectoryCalculator() TrajectoryCalculator {
 	return TrajectoryCalculator{
 		maximumCalculatorStepSize: unit.MustCreateDistance(1, unit.DistanceFoot),
 	}
 }
 
-//SightAngle calculates the sight angle for a rifle with scope height specified and zeroed using the ammo specified at
-//the range specified and under the conditions (atmosphere) specified.
+// SightAngle calculates the sight angle for a rifle with scope height specified and zeroed using the ammo specified at
+// the range specified and under the conditions (atmosphere) specified.
 //
-//The calculated value is to be used as sightAngle parameter of the ShotParameters structure
+// The calculated value is to be used as sightAngle parameter of the ShotParameters structure
 func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, atmosphere Atmosphere) unit.Angular {
 	var calculationStep = v.getCalculationStep(unit.MustCreateDistance(10, weapon.Zero().ZeroDistance().Units()).In(unit.DistanceFoot))
 
 	var deltaRangeVector, rangeVector, velocityVector, gravityVector vector.Vector
 	var muzzleVelocity, velocity, barrelAzimuth, barrelElevation float64
-	var densityFactor, mach, drag, zeroFindingError float64
+	var mach, drag, zeroFindingError float64
 	var time, deltaTime float64
 	var maximumRange float64
 
 	mach = atmosphere.Mach().In(unit.VelocityFPS)
-	densityFactor = atmosphere.getDensityFactor()
+	var densityFactor float64 = atmosphere.getDensityFactor()
 	muzzleVelocity = ammunition.MuzzleVelocity().In(unit.VelocityFPS)
 	barrelAzimuth = 0.0
 	barrelElevation = 0
@@ -81,9 +80,9 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 		velocity = muzzleVelocity
 		time = 0.0
 
-		//x - distance towards target,
-		//y - drop and
-		//z - windage
+		// x - distance towards target,
+		// y - drop and
+		// z - windage
 		rangeVector = vector.Create(0.0, -weapon.SightHeight().In(unit.DistanceFoot), 0)
 		velocityVector = vector.Create(math.Cos(barrelElevation)*math.Cos(barrelAzimuth), math.Sin(barrelElevation), math.Cos(barrelElevation)*math.Sin(barrelAzimuth)).MultiplyByConst(velocity)
 		var zeroDistance float64 = weapon.Zero().ZeroDistance().In(unit.DistanceFoot)
@@ -114,7 +113,7 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 	return unit.MustCreateAngular(barrelElevation, unit.AngularRadian)
 }
 
-//Trajectory calculates the trajectory with the parameters specified
+// Trajectory calculates the trajectory with the parameters specified
 func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, atmosphere Atmosphere, shotInfo ShotParameters, windInfo []WindInfo) []TrajectoryData {
 	var rangeTo float64 = shotInfo.MaximumDistance().In(unit.DistanceFoot)
 	var step float64 = shotInfo.Step().In(unit.DistanceFoot)
@@ -123,12 +122,10 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 
 	var deltaRangeVector, rangeVector, velocityAdjusted, velocityVector, windVector, gravityVector vector.Vector
 	var muzzleVelocity, velocity, barrelAzimuth, barrelElevation float64
-	var densityFactor, mach, drag float64
+	var drag float64
 	var time, deltaTime float64
 	var maximumRange, nextRangeDistance float64
-	var bulletWeight float64
-
-	bulletWeight = ammunition.Bullet().BulletWeight().In(unit.WeightGrain)
+	var bulletWeight float64 = ammunition.Bullet().BulletWeight().In(unit.WeightGrain)
 
 	var stabilityCoefficient = 1.0
 	var calculateDrift bool
@@ -145,7 +142,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	barrelElevation = shotInfo.SightAngle().In(unit.AngularRadian)
 	barrelElevation = barrelElevation + shotInfo.ShotAngle().In(unit.AngularRadian)
 	var alt0 float64 = atmosphere.Altitude().In(unit.DistanceFoot)
-	densityFactor, mach = atmosphere.getDensityFactorAndMachForAltitude(alt0)
+	// var densityFactor, mach float64 = atmosphere.getDensityFactorAndMachForAltitude(alt0) // ineffassign
 	var currentWind int
 	var nextWindRange = 1e7
 
@@ -163,9 +160,9 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	velocity = muzzleVelocity
 	time = 0.0
 
-	//x - distance towards target,
-	//y - drop and
-	//z - windage
+	// x - distance towards target,
+	// y - drop and
+	// z - windage
 	rangeVector = vector.Create(0.0, -weapon.SightHeight().In(unit.DistanceFoot), 0)
 	velocityVector = vector.Create(math.Cos(barrelElevation)*math.Cos(barrelAzimuth), math.Sin(barrelElevation), math.Cos(barrelElevation)*math.Sin(barrelAzimuth)).MultiplyByConst(velocity)
 
@@ -183,15 +180,15 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		}
 	}
 
-	//run all the way down the range
+	// run all the way down the range
 	for rangeVector.X <= maximumRange+calculationStep {
 		if velocity < cMinimumVelocity || rangeVector.Y < cMaximumDrop {
 			break
 		}
 
-		densityFactor, mach = atmosphere.getDensityFactorAndMachForAltitude(alt0 + rangeVector.Y)
-		//densityFactor = atmosphere.DensityFactor()
-		//mach = atmosphere.Mach().In(unit.Velocity_FPS)
+		var densityFactor, mach float64 = atmosphere.getDensityFactorAndMachForAltitude(alt0 + rangeVector.Y)
+		// densityFactor = atmosphere.DensityFactor()
+		// mach = atmosphere.Mach().In(unit.Velocity_FPS)
 
 		if rangeVector.X >= nextWindRange {
 			currentWind++

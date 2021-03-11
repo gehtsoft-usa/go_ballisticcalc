@@ -2,10 +2,10 @@ package unit
 
 import "fmt"
 
-//EnergyFootPound is the value indicating that energy value is expressed in foot-pounds
+// EnergyFootPound is the value indicating that energy value is expressed in foot-pounds
 const EnergyFootPound byte = 30
 
-//EnergyJoule is the value indicating that energy value is expressed in joules
+// EnergyJoule is the value indicating that energy value is expressed in joules
 const EnergyJoule byte = 31
 
 func energyToDefault(value float64, units byte) (float64, error) {
@@ -30,26 +30,25 @@ func energyFromDefault(value float64, units byte) (float64, error) {
 	}
 }
 
-//Energy structure keeps information about kinetic energy
+// Energy structure keeps information about kinetic energy
 type Energy struct {
 	value        float64
 	defaultUnits byte
 }
 
-//CreateEnergy creates a energy value.
+// CreateEnergy creates a energy value.
 //
-//units are measurement unit and may be any value from
-//unit.Energy_* constants.
+// units are measurement unit and may be any value from
+// unit.Energy_* constants.
 func CreateEnergy(value float64, units byte) (Energy, error) {
 	v, err := energyToDefault(value, units)
 	if err != nil {
 		return Energy{}, err
 	}
 	return Energy{value: v, defaultUnits: units}, nil
-
 }
 
-//MustCreateEnergy creates the energy value but panics instead of returned a error
+// MustCreateEnergy creates the energy value but panics instead of returned a error
 func MustCreateEnergy(value float64, units byte) Energy {
 	v, err := CreateEnergy(value, units)
 	if err != nil {
@@ -58,40 +57,39 @@ func MustCreateEnergy(value float64, units byte) Energy {
 	return v
 }
 
-//Value returns the value of the energy in the specified units.
+// Value returns the value of the energy in the specified units.
 //
-//units are measurement unit and may be any value from
-//unit.Energy_* constants.
+// units are measurement unit and may be any value from
+// unit.Energy_* constants.
 //
-//The method returns a error in case the unit is
-//not supported.
+// The method returns a error in case the unit is
+// not supported.
 func (v Energy) Value(units byte) (float64, error) {
 	return energyFromDefault(v.value, units)
 }
 
-//Convert converts the value into the specified units.
+// Convert converts the value into the specified units.
 //
-//units are measurement unit and may be any value from
-//unit.Energy_* constants.
+// units are measurement unit and may be any value from
+// unit.Energy_* constants.
 func (v Energy) Convert(units byte) Energy {
 	return Energy{value: v.value, defaultUnits: units}
 }
 
-//In converts the value in the specified units.
-//Returns 0 if unit conversion is not possible.
+// In converts the value in the specified units.
+// Returns 0 if unit conversion is not possible.
 func (v Energy) In(units byte) float64 {
 	x, e := energyFromDefault(v.value, units)
 	if e != nil {
 		return 0
 	}
 	return x
-
 }
 
 func (v Energy) String() string {
 	x, e := energyFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return unitErrorString
 	}
 	var unitName, format string
 	var accuracy int
@@ -108,10 +106,9 @@ func (v Energy) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
-//Units return the units in which the value is measured
+// Units return the units in which the value is measured
 func (v Energy) Units() byte {
 	return v.defaultUnits
 }

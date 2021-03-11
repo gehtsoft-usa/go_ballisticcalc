@@ -1,21 +1,21 @@
-package go_ballisticcalc_test
+package ballistics_test
 
 import (
 	"math"
 	"testing"
 
-	"github.com/gehtsoft-usa/go_ballisticcalc"
+	ballistics "github.com/gehtsoft-usa/go_ballisticcalc"
 	"github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 )
 
 func TestZero1(t *testing.T) {
-	bc, _ := go_ballisticcalc.CreateBallisticCoefficient(0.365, go_ballisticcalc.DragTableG1)
-	projectile := go_ballisticcalc.CreateProjectile(bc, unit.MustCreateWeight(69, unit.WeightGrain))
-	ammo := go_ballisticcalc.CreateAmmunition(projectile, unit.MustCreateVelocity(2600, unit.VelocityFPS))
-	zero := go_ballisticcalc.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-	weapon := go_ballisticcalc.CreateWeapon(unit.MustCreateDistance(3.2, unit.DistanceInch), zero)
-	atmosphere := go_ballisticcalc.CreateDefaultAtmosphere()
-	calc := go_ballisticcalc.CreateTrajectoryCalculator()
+	bc, _ := ballistics.CreateBallisticCoefficient(0.365, ballistics.DragTableG1)
+	projectile := ballistics.CreateProjectile(bc, unit.MustCreateWeight(69, unit.WeightGrain))
+	ammo := ballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2600, unit.VelocityFPS))
+	zero := ballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
+	weapon := ballistics.CreateWeapon(unit.MustCreateDistance(3.2, unit.DistanceInch), zero)
+	atmosphere := ballistics.CreateDefaultAtmosphere()
+	calc := ballistics.CreateTrajectoryCalculator()
 
 	sightAngle := calc.SightAngle(ammo, weapon, atmosphere)
 	if math.Abs(sightAngle.In(unit.AngularRadian)-0.001651) > 1e-6 {
@@ -24,14 +24,14 @@ func TestZero1(t *testing.T) {
 }
 
 func TestZero2(t *testing.T) {
-	bc, _ := go_ballisticcalc.CreateBallisticCoefficient(0.223, go_ballisticcalc.DragTableG7)
-	projectile := go_ballisticcalc.CreateProjectile(bc, unit.MustCreateWeight(168, unit.WeightGrain))
-	ammo := go_ballisticcalc.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
-	zero := go_ballisticcalc.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-	weapon := go_ballisticcalc.CreateWeapon(unit.MustCreateDistance(2, unit.DistanceInch), zero)
-	atmosphere := go_ballisticcalc.CreateDefaultAtmosphere()
+	bc, _ := ballistics.CreateBallisticCoefficient(0.223, ballistics.DragTableG7)
+	projectile := ballistics.CreateProjectile(bc, unit.MustCreateWeight(168, unit.WeightGrain))
+	ammo := ballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
+	zero := ballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
+	weapon := ballistics.CreateWeapon(unit.MustCreateDistance(2, unit.DistanceInch), zero)
+	atmosphere := ballistics.CreateDefaultAtmosphere()
 
-	calc := go_ballisticcalc.CreateTrajectoryCalculator()
+	calc := ballistics.CreateTrajectoryCalculator()
 
 	sightAngle := calc.SightAngle(ammo, weapon, atmosphere)
 	if math.Abs(sightAngle.In(unit.AngularRadian)-0.001228) > 1e-6 {
@@ -45,7 +45,7 @@ func assertEqual(t *testing.T, a, b, accuracy float64, name string) {
 	}
 }
 
-func validateOne(t *testing.T, data go_ballisticcalc.TrajectoryData,
+func validateOne(t *testing.T, data ballistics.TrajectoryData,
 	distance, velocity, mach, energy, path, hold, windage, windAdjustment, time, ogv float64,
 	adjustmentUnit byte) {
 	assertEqual(t, distance, data.TravelledDistance().In(unit.DistanceYard), 0.001, "Distance")
@@ -81,19 +81,19 @@ func validateOne(t *testing.T, data go_ballisticcalc.TrajectoryData,
 }
 
 func TestPathG1(t *testing.T) {
-	bc, _ := go_ballisticcalc.CreateBallisticCoefficient(0.223, go_ballisticcalc.DragTableG1)
-	projectile := go_ballisticcalc.CreateProjectile(bc, unit.MustCreateWeight(168, unit.WeightGrain))
-	ammo := go_ballisticcalc.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
-	zero := go_ballisticcalc.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-	weapon := go_ballisticcalc.CreateWeapon(unit.MustCreateDistance(2, unit.DistanceInch), zero)
-	atmosphere := go_ballisticcalc.CreateDefaultAtmosphere()
-	shotInfo := go_ballisticcalc.CreateShotParameters(unit.MustCreateAngular(0.001228, unit.AngularRadian),
+	bc, _ := ballistics.CreateBallisticCoefficient(0.223, ballistics.DragTableG1)
+	projectile := ballistics.CreateProjectile(bc, unit.MustCreateWeight(168, unit.WeightGrain))
+	ammo := ballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
+	zero := ballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
+	weapon := ballistics.CreateWeapon(unit.MustCreateDistance(2, unit.DistanceInch), zero)
+	atmosphere := ballistics.CreateDefaultAtmosphere()
+	shotInfo := ballistics.CreateShotParameters(unit.MustCreateAngular(0.001228, unit.AngularRadian),
 		unit.MustCreateDistance(1000, unit.DistanceYard),
 		unit.MustCreateDistance(100, unit.DistanceYard))
-	wind := go_ballisticcalc.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
+	wind := ballistics.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
 		unit.MustCreateAngular(-45, unit.AngularDegree))
 
-	calc := go_ballisticcalc.CreateTrajectoryCalculator()
+	calc := ballistics.CreateTrajectoryCalculator()
 	data := calc.Trajectory(ammo, weapon, atmosphere, shotInfo, wind)
 
 	assertEqual(t, float64(len(data)), 11, 0.1, "Length")
@@ -105,21 +105,21 @@ func TestPathG1(t *testing.T) {
 }
 
 func TestPathG7(t *testing.T) {
-	bc, _ := go_ballisticcalc.CreateBallisticCoefficient(0.223, go_ballisticcalc.DragTableG7)
-	projectile := go_ballisticcalc.CreateProjectileWithDimensions(bc, unit.MustCreateDistance(0.308, unit.DistanceInch),
+	bc, _ := ballistics.CreateBallisticCoefficient(0.223, ballistics.DragTableG7)
+	projectile := ballistics.CreateProjectileWithDimensions(bc, unit.MustCreateDistance(0.308, unit.DistanceInch),
 		unit.MustCreateDistance(1.282, unit.DistanceInch), unit.MustCreateWeight(168, unit.WeightGrain))
-	ammo := go_ballisticcalc.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
-	zero := go_ballisticcalc.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-	twist := go_ballisticcalc.CreateTwist(go_ballisticcalc.TwistRight, unit.MustCreateDistance(11.24, unit.DistanceInch))
-	weapon := go_ballisticcalc.CreateWeaponWithTwist(unit.MustCreateDistance(2, unit.DistanceInch), zero, twist)
-	atmosphere := go_ballisticcalc.CreateDefaultAtmosphere()
-	shotInfo := go_ballisticcalc.CreateShotParameters(unit.MustCreateAngular(4.221, unit.AngularMOA),
+	ammo := ballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
+	zero := ballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
+	twist := ballistics.CreateTwist(ballistics.TwistRight, unit.MustCreateDistance(11.24, unit.DistanceInch))
+	weapon := ballistics.CreateWeaponWithTwist(unit.MustCreateDistance(2, unit.DistanceInch), zero, twist)
+	atmosphere := ballistics.CreateDefaultAtmosphere()
+	shotInfo := ballistics.CreateShotParameters(unit.MustCreateAngular(4.221, unit.AngularMOA),
 		unit.MustCreateDistance(1000, unit.DistanceYard),
 		unit.MustCreateDistance(100, unit.DistanceYard))
-	wind := go_ballisticcalc.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
+	wind := ballistics.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
 		unit.MustCreateAngular(-45, unit.AngularDegree))
 
-	calc := go_ballisticcalc.CreateTrajectoryCalculator()
+	calc := ballistics.CreateTrajectoryCalculator()
 	data := calc.Trajectory(ammo, weapon, atmosphere, shotInfo, wind)
 
 	assertEqual(t, float64(len(data)), 11, 0.1, "Length")

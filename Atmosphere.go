@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package ballistics
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ const cStandardTemperature float64 = 59.0
 const cStandardPressure float64 = 29.92
 const cStandardDensity float64 = 0.076474
 
-//Atmosphere describes the atmosphere conditions
+// Atmosphere describes the atmosphere conditions
 type Atmosphere struct {
 	altitude    unit.Distance
 	pressure    unit.Pressure
@@ -34,7 +34,7 @@ type Atmosphere struct {
 	mach1       float64
 }
 
-//CreateDefaultAtmosphere creates a default atmosphere used in ballistic calculations
+// CreateDefaultAtmosphere creates a default atmosphere used in ballistic calculations
 func CreateDefaultAtmosphere() Atmosphere {
 	a := Atmosphere{altitude: unit.MustCreateDistance(0, unit.DistanceFoot),
 		pressure:    unit.MustCreatePressure(cStandardPressure, unit.PressureInHg),
@@ -44,10 +44,10 @@ func CreateDefaultAtmosphere() Atmosphere {
 	return a
 }
 
-//CreateAtmosphere creates the atmosphere with the specified parameter
+// CreateAtmosphere creates the atmosphere with the specified parameter
 func CreateAtmosphere(altitude unit.Distance, pressure unit.Pressure, temperature unit.Temperature, humidity float64) (Atmosphere, error) {
 	if humidity < 0 || humidity > 100 {
-		return CreateDefaultAtmosphere(), fmt.Errorf("Atmosphere : humidity must be in 0..1 or 0..100 range")
+		return CreateDefaultAtmosphere(), fmt.Errorf("atmosphere : humidity must be in 0..1 or 0..100 range")
 	}
 
 	if humidity > 1 {
@@ -61,10 +61,9 @@ func CreateAtmosphere(altitude unit.Distance, pressure unit.Pressure, temperatur
 
 	a.calculate()
 	return a, nil
-
 }
 
-//CreateICAOAtmosphere creates default ICAO atmosphere for the specified altitude
+// CreateICAOAtmosphere creates default ICAO atmosphere for the specified altitude
 func CreateICAOAtmosphere(altitude unit.Distance) Atmosphere {
 	temperature := unit.MustCreateTemperature(
 		cIcaoStandardTemperatureR+
@@ -87,32 +86,31 @@ func CreateICAOAtmosphere(altitude unit.Distance) Atmosphere {
 	a.calculate()
 
 	return a
-
 }
 
-//Altitude returns the ground level altitude over the sea level
+// Altitude returns the ground level altitude over the sea level
 func (a Atmosphere) Altitude() unit.Distance {
 	return a.altitude
 }
 
-//Temperature returns the temperature at the ground level
+// Temperature returns the temperature at the ground level
 func (a Atmosphere) Temperature() unit.Temperature {
 	return a.temperature
 }
 
-//Pressure returns the pressure at the ground level
+// Pressure returns the pressure at the ground level
 func (a Atmosphere) Pressure() unit.Pressure {
 	return a.pressure
 }
 
-//Humidity returns the relative humidity set in 0 to 1 coefficient
+// Humidity returns the relative humidity set in 0 to 1 coefficient
 //
-//multiply this value by 100 to get percents
+// multiply this value by 100 to get percents
 func (a Atmosphere) Humidity() float64 {
 	return a.humidity
 }
 
-//HumidityInPercents returns relative humidity in percents (0..100)
+// HumidityInPercents returns relative humidity in percents (0..100)
 func (a Atmosphere) HumidityInPercents() float64 {
 	return a.humidity * 100
 }
@@ -122,15 +120,16 @@ func (a Atmosphere) String() string {
 		a.altitude, a.pressure, a.temperature, a.humidity*100)
 }
 
-func (a Atmosphere) getDensity() float64 {
-	return a.density
-}
+// Unused
+// func (a Atmosphere) getDensity() float64 {
+// 	return a.density
+// }
 
 func (a Atmosphere) getDensityFactor() float64 {
 	return a.density / cStandardDensity
 }
 
-//Mach returns the speed of sound at the atmosphere with such parameters
+// Mach returns the speed of sound at the atmosphere with such parameters
 func (a Atmosphere) Mach() unit.Velocity {
 	return a.mach
 }
@@ -148,7 +147,6 @@ func (a *Atmosphere) calculate0(t, p float64) (float64, float64) {
 	density = cStandardDensity * (cIcaoStandardTemperatureR / (t + cIcaoFreezingPointTemperatureR)) * hc
 	mach = math.Sqrt(t+cIcaoFreezingPointTemperatureR) * cSpeedOfSound
 	return density, mach
-
 }
 
 func (a *Atmosphere) calculate() {

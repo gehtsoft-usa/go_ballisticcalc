@@ -2,37 +2,37 @@ package unit
 
 import "fmt"
 
-//DistanceInch is the value indicating that the distance value is set in inches
+// DistanceInch is the value indicating that the distance value is set in inches
 const DistanceInch byte = 10
 
-//DistanceFoot is the value indicating that the distance value is set in feet
+// DistanceFoot is the value indicating that the distance value is set in feet
 const DistanceFoot byte = 11
 
-//DistanceYard is the value indicating that the distance value is set in yards
+// DistanceYard is the value indicating that the distance value is set in yards
 const DistanceYard byte = 12
 
-//DistanceMile is the value indicating that the distance value is set in miles
+// DistanceMile is the value indicating that the distance value is set in miles
 const DistanceMile byte = 13
 
-//DistanceNauticalMile is the value indicating that the distance value is set in nautical miles
+// DistanceNauticalMile is the value indicating that the distance value is set in nautical miles
 const DistanceNauticalMile byte = 14
 
-//DistanceMillimeter is the value indicating that the distance value is set in millimeters
+// DistanceMillimeter is the value indicating that the distance value is set in millimeters
 const DistanceMillimeter byte = 15
 
-//DistanceCentimeter is the value indicating that the distance value is set in centimeters
+// DistanceCentimeter is the value indicating that the distance value is set in centimeters
 const DistanceCentimeter byte = 16
 
-//DistanceMeter is the value indicating that the distance value is set in meters
+// DistanceMeter is the value indicating that the distance value is set in meters
 const DistanceMeter byte = 17
 
-//DistanceKilometer is the value indicating that the distance value is set in kilometers
+// DistanceKilometer is the value indicating that the distance value is set in kilometers
 const DistanceKilometer byte = 18
 
-//DistanceLine is the value indicating that the distance value is set in lines (1/10 of inch)
+// DistanceLine is the value indicating that the distance value is set in lines (1/10 of inch)
 const DistanceLine byte = 19
 
-//Distance structure keeps the The distance value
+// Distance structure keeps the The distance value
 type Distance struct {
 	value        float64
 	defaultUnits byte
@@ -63,7 +63,6 @@ func distanceToDefault(value float64, units byte) (float64, error) {
 	default:
 		return 0, fmt.Errorf("Distance: unit %d is not supported", units)
 	}
-
 }
 
 func distanceFromDefault(value float64, units byte) (float64, error) {
@@ -93,20 +92,19 @@ func distanceFromDefault(value float64, units byte) (float64, error) {
 	}
 }
 
-//CreateDistance creates a distance value.
+// CreateDistance creates a distance value.
 //
-//units are measurement unit and may be any value from
-//unit.Distance_* constants.
+// units are measurement unit and may be any value from
+// unit.Distance_* constants.
 func CreateDistance(value float64, units byte) (Distance, error) {
 	v, err := distanceToDefault(value, units)
 	if err != nil {
 		return Distance{}, err
 	}
 	return Distance{value: v, defaultUnits: units}, nil
-
 }
 
-//MustCreateDistance creates the distance value but panics instead of returned a error
+// MustCreateDistance creates the distance value but panics instead of returned a error
 func MustCreateDistance(value float64, units byte) Distance {
 	v, err := CreateDistance(value, units)
 	if err != nil {
@@ -115,27 +113,27 @@ func MustCreateDistance(value float64, units byte) Distance {
 	return v
 }
 
-//Value returns the value of the distance in the specified units.
+// Value returns the value of the distance in the specified units.
 //
-//units are measurement unit and may be any value from
-//unit.Distance_* constants.
+// units are measurement unit and may be any value from
+// unit.Distance_* constants.
 //
-//The method returns a error in case the unit is
-//not supported.
+// The method returns a error in case the unit is
+// not supported.
 func (v Distance) Value(units byte) (float64, error) {
 	return distanceFromDefault(v.value, units)
 }
 
-//Convert converts the value into the specified units.
+// Convert converts the value into the specified units.
 //
-//units are measurement unit and may be any value from
-//unit.Distance_* constants.
+// units are measurement unit and may be any value from
+// unit.Distance_* constants.
 func (v Distance) Convert(units byte) Distance {
 	return Distance{value: v.value, defaultUnits: units}
 }
 
-//In converts the value in the specified units.
-//Returns 0 if unit conversion is not possible.
+// In converts the value in the specified units.
+// Returns 0 if unit conversion is not possible.
 func (v Distance) In(units byte) float64 {
 	x, e := distanceFromDefault(v.value, units)
 	if e != nil {
@@ -147,7 +145,7 @@ func (v Distance) In(units byte) float64 {
 func (v Distance) String() string {
 	x, e := distanceFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return unitErrorString
 	}
 	var unitName, format string
 	var accuracy int
@@ -188,10 +186,9 @@ func (v Distance) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
-//Units return the units in which the value is measured
+// Units return the units in which the value is measured
 func (v Distance) Units() byte {
 	return v.defaultUnits
 }
