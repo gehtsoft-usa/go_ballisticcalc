@@ -40,8 +40,8 @@ func (v TrajectoryCalculator) getCalculationStep(step float64) float64 {
 
 	var maximumStep float64 = v.maximumCalculatorStepSize.In(unit.DistanceFoot)
 	if step > maximumStep {
-		var stepOrder = int(math.Floor(math.Log10(step)))
-		var maximumOrder = int(math.Floor(math.Log10(maximumStep)))
+		stepOrder := int(math.Floor(math.Log10(step)))
+		maximumOrder := int(math.Floor(math.Log10(maximumStep)))
 
 		step = step / math.Pow(10, float64(stepOrder-maximumOrder+1))
 	}
