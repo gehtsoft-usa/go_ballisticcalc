@@ -137,8 +137,8 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		calculateDrift = true
 	}
 
-	var rangesLength = int(math.Floor(rangeTo/step)) + 1
-	var ranges = make([]TrajectoryData, rangesLength)
+	rangesLength := int(math.Floor(rangeTo/step)) + 1
+	ranges := make([]TrajectoryData, rangesLength)
 
 	barrelAzimuth = 0.0
 	barrelElevation = shotInfo.SightAngle().In(unit.AngularRadian)
