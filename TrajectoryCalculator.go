@@ -209,8 +209,8 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 				windage += (1.25 * (stabilityCoefficient + 1.2) * math.Pow(time, 1.83) * twistCoefficient) / 12.0
 			}
 
-			var dropAdjustment = getCorrection(rangeVector.X, rangeVector.Y)
-			var windageAdjustment = getCorrection(rangeVector.X, windage)
+			dropAdjustment := getCorrection(rangeVector.X, rangeVector.Y)
+			windageAdjustment := getCorrection(rangeVector.X, windage)
 
 			ranges[currentItem] = TrajectoryData{
 				time:              Timespan{time: time},
