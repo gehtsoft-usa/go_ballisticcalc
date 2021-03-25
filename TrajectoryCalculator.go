@@ -254,7 +254,7 @@ func calculateStabilityCoefficient(ammunitionInfo Ammunition, rifleInfo Weapon, 
 
 	var ft float64 = atmosphere.Temperature().In(unit.TemperatureFahrenheit)
 	var pt float64 = atmosphere.Pressure().In(unit.PressureInHg)
-	var ftp = ((ft + 460) / (59 + 460)) * (29.92 / pt)
+	ftp := ((ft + 460) / (59 + 460)) * (29.92 / pt)
 
 	return sd * fv * ftp
 }
