@@ -60,7 +60,7 @@ func CreateTrajectoryCalculator() TrajectoryCalculator {
 //
 // The calculated value is to be used as sightAngle parameter of the ShotParameters structure
 func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, atmosphere Atmosphere) unit.Angular {
-	var calculationStep = v.getCalculationStep(unit.MustCreateDistance(10, weapon.Zero().ZeroDistance().Units()).In(unit.DistanceFoot))
+	calculationStep := v.getCalculationStep(unit.MustCreateDistance(10, weapon.Zero().ZeroDistance().Units()).In(unit.DistanceFoot))
 
 	var deltaRangeVector, rangeVector, velocityVector, gravityVector vector.Vector
 	var muzzleVelocity, velocity, barrelAzimuth, barrelElevation float64
