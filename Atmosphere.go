@@ -7,21 +7,23 @@ import (
 	"github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 )
 
-const cIcaoStandardTemperatureR float64 = 518.67
-const cIcaoFreezingPointTemperatureR float64 = 459.67
-const cTemperatureGradient float64 = -3.56616e-03
-const cIcaoStandardHumidity float64 = 0.0
-const cPressureExponent float64 = -5.255876
-const cSpeedOfSound float64 = 49.0223
-const cA0 float64 = 1.24871
-const cA1 float64 = 0.0988438
-const cA2 float64 = 0.00152907
-const cA3 float64 = -3.07031e-06
-const cA4 float64 = 4.21329e-07
-const cA5 float64 = 3.342e-04
-const cStandardTemperature float64 = 59.0
-const cStandardPressure float64 = 29.92
-const cStandardDensity float64 = 0.076474
+const (
+	cIcaoStandardTemperatureR      float64 = 518.67
+	cIcaoFreezingPointTemperatureR float64 = 459.67
+	cTemperatureGradient           float64 = -3.56616e-03
+	cIcaoStandardHumidity          float64 = 0.0
+	cPressureExponent              float64 = -5.255876
+	cSpeedOfSound                  float64 = 49.0223
+	cA0                            float64 = 1.24871
+	cA1                            float64 = 0.0988438
+	cA2                            float64 = 0.00152907
+	cA3                            float64 = -3.07031e-06
+	cA4                            float64 = 4.21329e-07
+	cA5                            float64 = 3.342e-04
+	cStandardTemperature           float64 = 59.0
+	cStandardPressure              float64 = 29.92
+	cStandardDensity               float64 = 0.076474
+)
 
 // Atmosphere describes the atmosphere conditions
 type Atmosphere struct {
@@ -36,10 +38,12 @@ type Atmosphere struct {
 
 // CreateDefaultAtmosphere creates a default atmosphere used in ballistic calculations
 func CreateDefaultAtmosphere() Atmosphere {
-	a := Atmosphere{altitude: unit.MustCreateDistance(0, unit.DistanceFoot),
+	a := Atmosphere{
+		altitude:    unit.MustCreateDistance(0, unit.DistanceFoot),
 		pressure:    unit.MustCreatePressure(cStandardPressure, unit.PressureInHg),
 		temperature: unit.MustCreateTemperature(cStandardTemperature, unit.TemperatureFahrenheit),
-		humidity:    0.78}
+		humidity:    0.78,
+	}
 	a.calculate()
 	return a
 }
@@ -54,10 +58,12 @@ func CreateAtmosphere(altitude unit.Distance, pressure unit.Pressure, temperatur
 		humidity = humidity / 100
 	}
 
-	a := Atmosphere{altitude: altitude,
+	a := Atmosphere{
+		altitude:    altitude,
 		pressure:    pressure,
 		temperature: temperature,
-		humidity:    humidity}
+		humidity:    humidity,
+	}
 
 	a.calculate()
 	return a, nil
