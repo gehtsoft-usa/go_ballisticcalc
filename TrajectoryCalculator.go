@@ -120,7 +120,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	var rangeTo float64 = shotInfo.MaximumDistance().In(unit.DistanceFoot)
 	var step float64 = shotInfo.Step().In(unit.DistanceFoot)
 
-	var calculationStep = v.getCalculationStep(step)
+	calculationStep := v.getCalculationStep(step)
 
 	var deltaRangeVector, rangeVector, velocityAdjusted, velocityVector, windVector, gravityVector vector.Vector
 	var muzzleVelocity, velocity, barrelAzimuth, barrelElevation float64
