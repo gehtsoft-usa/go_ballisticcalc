@@ -18,11 +18,13 @@ type Projectile struct {
 // Dimensions are only required if you want to take into account projectile spin drift.
 // TwistInfo must be also set in this case.
 func CreateProjectileWithDimensions(ballisticCoefficient BallisticCoefficient, bulletDiameter unit.Distance, bulletLength unit.Distance, weight unit.Weight) Projectile {
-	return Projectile{ballisticCoefficient: ballisticCoefficient,
-		hasDimensions:  true,
-		bulletDiameter: bulletDiameter,
-		bulletLength:   bulletLength,
-		weight:         weight}
+	return Projectile{
+		ballisticCoefficient: ballisticCoefficient,
+		hasDimensions:        true,
+		bulletDiameter:       bulletDiameter,
+		bulletLength:         bulletLength,
+		weight:               weight,
+	}
 }
 
 // CreateProjectile create projectile description without dimensions.
