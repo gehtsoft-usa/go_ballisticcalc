@@ -743,7 +743,7 @@ func calculateCurve(dataPoints []DataPoint) []CurvePoint {
 	var x1, x2, x3, y1, y2, y3, a, b, c float64
 
 	curve = make([]CurvePoint, numPoints)
-	var rate = (dataPoints[1].B - dataPoints[0].B) / (dataPoints[1].A - dataPoints[0].A)
+	rate := (dataPoints[1].B - dataPoints[0].B) / (dataPoints[1].A - dataPoints[0].A)
 	curve[0] = CurvePoint{A: 0, B: rate, C: dataPoints[0].B - dataPoints[0].A*rate}
 
 	// rest as 2nd degree polynomials on three adjacent points
