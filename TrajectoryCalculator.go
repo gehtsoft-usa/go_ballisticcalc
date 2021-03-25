@@ -260,13 +260,13 @@ func calculateStabilityCoefficient(ammunitionInfo Ammunition, rifleInfo Weapon, 
 }
 
 func windToVector(shot ShotParameters, wind WindInfo) vector.Vector {
-	var sightCosine = math.Cos(shot.SightAngle().In(unit.AngularRadian))
-	var sightSine = math.Sin(shot.SightAngle().In(unit.AngularRadian))
-	var cantCosine = math.Cos(shot.CantAngle().In(unit.AngularRadian))
-	var cantSine = math.Sin(shot.CantAngle().In(unit.AngularRadian))
-	var rangeVelocity = wind.velocity.In(unit.VelocityFPS) * math.Cos(wind.direction.In(unit.AngularRadian))
-	var crossComponent = wind.velocity.In(unit.VelocityFPS) * math.Sin(wind.direction.In(unit.AngularRadian))
-	var rangeFactor = -rangeVelocity * sightSine
+	sightCosine := math.Cos(shot.SightAngle().In(unit.AngularRadian))
+	sightSine := math.Sin(shot.SightAngle().In(unit.AngularRadian))
+	cantCosine := math.Cos(shot.CantAngle().In(unit.AngularRadian))
+	cantSine := math.Sin(shot.CantAngle().In(unit.AngularRadian))
+	rangeVelocity := wind.velocity.In(unit.VelocityFPS) * math.Cos(wind.direction.In(unit.AngularRadian))
+	crossComponent := wind.velocity.In(unit.VelocityFPS) * math.Sin(wind.direction.In(unit.AngularRadian))
+	rangeFactor := -rangeVelocity * sightSine
 	return vector.Create(rangeVelocity*sightCosine, rangeFactor*cantCosine+crossComponent*cantSine, crossComponent*cantCosine-rangeFactor*cantSine)
 }
 
