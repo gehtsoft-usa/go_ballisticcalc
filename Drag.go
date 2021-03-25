@@ -738,7 +738,7 @@ var gSCurve = calculateCurve(gSTable)
 
 func calculateCurve(dataPoints []DataPoint) []CurvePoint {
 	var curve []CurvePoint
-	var numPoints = len(dataPoints)
+	numPoints := len(dataPoints)
 	var i int
 	var x1, x2, x3, y1, y2, y3, a, b, c float64
 
