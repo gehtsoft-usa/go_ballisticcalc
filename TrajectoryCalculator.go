@@ -129,7 +129,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	var maximumRange, nextRangeDistance float64
 	var bulletWeight float64 = ammunition.Bullet().BulletWeight().In(unit.WeightGrain)
 
-	var stabilityCoefficient = 1.0
+	stabilityCoefficient := 1.0
 	var calculateDrift bool
 
 	if weapon.HasTwist() && ammunition.Bullet().HasDimensions() {
