@@ -7,11 +7,13 @@ import (
 	"github.com/gehtsoft-usa/go_ballisticcalc/bmath/vector"
 )
 
-const cZeroFindingAccuracy float64 = 0.000005
-const cMinimumVelocity float64 = 50.0
-const cMaximumDrop float64 = -15000
-const cMaxIterations int = 10
-const cGravityConstant float64 = -32.17405
+const (
+	cZeroFindingAccuracy float64 = 0.000005
+	cMinimumVelocity     float64 = 50.0
+	cMaximumDrop         float64 = -15000
+	cMaxIterations       int     = 10
+	cGravityConstant     float64 = -32.17405
+)
 
 // TrajectoryCalculator table is used to calculate the trajectory of a projectile shot with the parameters specified
 type TrajectoryCalculator struct {
