@@ -249,8 +249,8 @@ func calculateStabilityCoefficient(ammunitionInfo Ammunition, rifleInfo Weapon, 
 	var diameter float64 = ammunitionInfo.Bullet().BulletDiameter().In(unit.DistanceInch)
 	var twist float64 = rifleInfo.Twist().Twist().In(unit.DistanceInch) / diameter
 	var length float64 = ammunitionInfo.Bullet().BulletLength().In(unit.DistanceInch) / diameter
-	var sd = 30 * weight / (math.Pow(twist, 2) * math.Pow(diameter, 3) * length * (1 + math.Pow(length, 2)))
-	var fv = math.Pow(ammunitionInfo.MuzzleVelocity().In(unit.VelocityFPS)/2800, 1.0/3.0)
+	sd := 30 * weight / (math.Pow(twist, 2) * math.Pow(diameter, 3) * length * (1 + math.Pow(length, 2)))
+	fv := math.Pow(ammunitionInfo.MuzzleVelocity().In(unit.VelocityFPS)/2800, 1.0/3.0)
 
 	var ft float64 = atmosphere.Temperature().In(unit.TemperatureFahrenheit)
 	var pt float64 = atmosphere.Pressure().In(unit.PressureInHg)
