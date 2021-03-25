@@ -146,7 +146,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	var alt0 float64 = atmosphere.Altitude().In(unit.DistanceFoot)
 	// var densityFactor, mach float64 = atmosphere.getDensityFactorAndMachForAltitude(alt0) // ineffassign
 	var currentWind int
-	var nextWindRange = 1e7
+	nextWindRange := 1e7
 
 	if len(windInfo) < 1 {
 		windVector = vector.Create(0, 0, 0)
