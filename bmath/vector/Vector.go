@@ -66,13 +66,10 @@ func (v Vector) Negate() Vector {
 
 //Normalize returns a vector of magnitude one which is collinear to this vector
 func (v Vector) Normalize() Vector {
-	var magnitude float64
-
-	magnitude = v.Magnitude()
+	var magnitude = v.Magnitude()
 
 	if math.Abs(magnitude) < 1e-10 {
 		return v.Copy()
 	}
 	return v.MultiplyByConst(1.0 / magnitude)
-
 }

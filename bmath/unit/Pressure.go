@@ -31,7 +31,6 @@ func pressureToDefault(value float64, units byte) (float64, error) {
 		return value * 51.714924102396, nil
 	default:
 		return 0, fmt.Errorf("Pressure: unit %d is not supported", units)
-
 	}
 }
 
@@ -49,7 +48,6 @@ func pressureFromDefault(value float64, units byte) (float64, error) {
 		return value / 51.714924102396, nil
 	default:
 		return 0, fmt.Errorf("Pressure: unit %d is not supported", units)
-
 	}
 }
 
@@ -69,7 +67,6 @@ func CreatePressure(value float64, units byte) (Pressure, error) {
 		return Pressure{}, err
 	}
 	return Pressure{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreatePressure creates the pressure value but panics instead of returned a error
@@ -108,13 +105,12 @@ func (v Pressure) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 func (v Pressure) String() string {
 	x, e := pressureFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -140,7 +136,6 @@ func (v Pressure) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

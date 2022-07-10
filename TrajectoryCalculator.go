@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import (
 	"math"
@@ -35,10 +35,9 @@ func (v *TrajectoryCalculator) SetMaximumCalculatorStepSize(x unit.Distance) {
 
 func (v TrajectoryCalculator) getCalculationStep(step float64) float64 {
 	step = step / 2 //do it twice for increased accuracy of velocity calculation and 10 times per step
+	var maximumStep = v.maximumCalculatorStepSize.In(unit.DistanceFoot)
 
-	var maximumStep float64 = v.maximumCalculatorStepSize.In(unit.DistanceFoot)
 	if step > maximumStep {
-
 		var stepOrder = int(math.Floor(math.Log10(step)))
 		var maximumOrder = int(math.Floor(math.Log10(maximumStep)))
 
@@ -86,7 +85,7 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 		//z - windage
 		rangeVector = vector.Create(0.0, -weapon.SightHeight().In(unit.DistanceFoot), 0)
 		velocityVector = vector.Create(math.Cos(barrelElevation)*math.Cos(barrelAzimuth), math.Sin(barrelElevation), math.Cos(barrelElevation)*math.Sin(barrelAzimuth)).MultiplyByConst(velocity)
-		var zeroDistance float64 = weapon.Zero().ZeroDistance().In(unit.DistanceFoot)
+		var zeroDistance = weapon.Zero().ZeroDistance().In(unit.DistanceFoot)
 		maximumRange = zeroDistance + calculationStep
 
 		for rangeVector.X <= maximumRange {
@@ -116,8 +115,8 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 
 //Trajectory calculates the trajectory with the parameters specified
 func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, atmosphere Atmosphere, shotInfo ShotParameters, windInfo []WindInfo) []TrajectoryData {
-	var rangeTo float64 = shotInfo.MaximumDistance().In(unit.DistanceFoot)
-	var step float64 = shotInfo.Step().In(unit.DistanceFoot)
+	var rangeTo = shotInfo.MaximumDistance().In(unit.DistanceFoot)
+	var step = shotInfo.Step().In(unit.DistanceFoot)
 
 	var calculationStep = v.getCalculationStep(step)
 
@@ -126,10 +125,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	var densityFactor, mach, drag float64
 	var time, deltaTime float64
 	var maximumRange, nextRangeDistance float64
-	var bulletWeight float64
-
-	bulletWeight = ammunition.Bullet().BulletWeight().In(unit.WeightGrain)
-
+	var bulletWeight = ammunition.Bullet().BulletWeight().In(unit.WeightGrain)
 	var stabilityCoefficient = 1.0
 	var calculateDrift bool
 
@@ -144,8 +140,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	barrelAzimuth = 0.0
 	barrelElevation = shotInfo.SightAngle().In(unit.AngularRadian)
 	barrelElevation = barrelElevation + shotInfo.ShotAngle().In(unit.AngularRadian)
-	var alt0 float64 = atmosphere.Altitude().In(unit.DistanceFoot)
-	densityFactor, mach = atmosphere.getDensityFactorAndMachForAltitude(alt0)
+	var alt0 = atmosphere.Altitude().In(unit.DistanceFoot)
 	var currentWind int
 	var nextWindRange = 1e7
 
@@ -205,7 +200,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		}
 
 		if rangeVector.X >= nextRangeDistance {
-			var windage float64 = rangeVector.Z
+			var windage = rangeVector.Z
 			if calculateDrift {
 				windage += (1.25 * (stabilityCoefficient + 1.2) * math.Pow(time, 1.83) * twistCoefficient) / 12.0
 			}
@@ -246,15 +241,15 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 }
 
 func calculateStabilityCoefficient(ammunitionInfo Ammunition, rifleInfo Weapon, atmosphere Atmosphere) float64 {
-	var weight float64 = ammunitionInfo.Bullet().BulletWeight().In(unit.WeightGrain)
-	var diameter float64 = ammunitionInfo.Bullet().BulletDiameter().In(unit.DistanceInch)
-	var twist float64 = rifleInfo.Twist().Twist().In(unit.DistanceInch) / diameter
-	var length float64 = ammunitionInfo.Bullet().BulletLength().In(unit.DistanceInch) / diameter
+	var weight = ammunitionInfo.Bullet().BulletWeight().In(unit.WeightGrain)
+	var diameter = ammunitionInfo.Bullet().BulletDiameter().In(unit.DistanceInch)
+	var twist = rifleInfo.Twist().Twist().In(unit.DistanceInch) / diameter
+	var length = ammunitionInfo.Bullet().BulletLength().In(unit.DistanceInch) / diameter
 	var sd = 30 * weight / (math.Pow(twist, 2) * math.Pow(diameter, 3) * length * (1 + math.Pow(length, 2)))
 	var fv = math.Pow(ammunitionInfo.MuzzleVelocity().In(unit.VelocityFPS)/2800, 1.0/3.0)
 
-	var ft float64 = atmosphere.Temperature().In(unit.TemperatureFahrenheit)
-	var pt float64 = atmosphere.Pressure().In(unit.PressureInHg)
+	var ft = atmosphere.Temperature().In(unit.TemperatureFahrenheit)
+	var pt = atmosphere.Pressure().In(unit.PressureInHg)
 	var ftp = ((ft + 460) / (59 + 460)) * (29.92 / pt)
 
 	return sd * fv * ftp

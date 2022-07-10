@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import "github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 

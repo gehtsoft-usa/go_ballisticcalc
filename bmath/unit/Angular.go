@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+const defaultUnitsError = "error: default units aren't correct"
+
 //AngularRadian is the value indicating that the angular value is set in radians
 const AngularRadian byte = 0
 
@@ -129,7 +131,6 @@ func (v Angular) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 //Prints the value in its default units.
@@ -139,7 +140,7 @@ func (v Angular) In(units byte) float64 {
 func (v Angular) String() string {
 	x, e := angularFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -174,7 +175,6 @@ func (v Angular) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

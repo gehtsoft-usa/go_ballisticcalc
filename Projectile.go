@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import "github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 
@@ -19,7 +19,6 @@ func CreateProjectileWithDimensions(ballisticCoefficient BallisticCoefficient,
 	bulletDiameter unit.Distance,
 	bulletLength unit.Distance,
 	weight unit.Weight) Projectile {
-
 	return Projectile{ballisticCoefficient: ballisticCoefficient,
 		hasDimensions:  true,
 		bulletDiameter: bulletDiameter,
@@ -32,7 +31,6 @@ func CreateProjectileWithDimensions(ballisticCoefficient BallisticCoefficient,
 //If no dimensions set, the trajectory calculator won't be able to calculate spin drift.
 func CreateProjectile(ballisticCoefficient BallisticCoefficient,
 	weight unit.Weight) Projectile {
-
 	return Projectile{ballisticCoefficient: ballisticCoefficient,
 		hasDimensions: false,
 		weight:        weight}

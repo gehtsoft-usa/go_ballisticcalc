@@ -36,7 +36,6 @@ func weightToDefault(value float64, units byte) (float64, error) {
 		return value * 437.5, nil
 	default:
 		return 0, fmt.Errorf("Weight: unit %d is not supported", units)
-
 	}
 }
 
@@ -56,7 +55,6 @@ func weightFromDefault(value float64, units byte) (float64, error) {
 		return value / 437.5, nil
 	default:
 		return 0, fmt.Errorf("Weight: unit %d is not supported", units)
-
 	}
 }
 
@@ -76,7 +74,6 @@ func CreateWeight(value float64, units byte) (Weight, error) {
 		return Weight{}, err
 	}
 	return Weight{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreateWeight creates the weight value but panics instead of return error
@@ -115,13 +112,12 @@ func (v Weight) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 func (v Weight) String() string {
 	x, e := weightFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -150,7 +146,6 @@ func (v Weight) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured
