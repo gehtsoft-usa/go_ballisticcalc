@@ -1,6 +1,10 @@
 package externalballistics
 
-import "github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
+import (
+	"math"
+
+	"github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
+)
 
 //Projectile keeps description of a projectile
 type Projectile struct {
@@ -60,6 +64,13 @@ func (v Projectile) BulletLength() unit.Distance {
 //has dimensions set
 func (v Projectile) HasDimensions() bool {
 	return v.hasDimensions
+}
+
+func (v Projectile) GetBallisticCoefficient() float64 {
+	if v.ballisticCoefficient.valueType == BC {
+		return v.ballisticCoefficient.value
+	}
+	return v.weight.In(unit.WeightGrain) / 7000.0 / math.Pow(v.bulletDiameter.In(unit.DistanceInch), 2) / v.ballisticCoefficient.value
 }
 
 //Ammunition struct keeps the des of ammunition (e.g. projectile loaded into a case shell)

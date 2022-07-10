@@ -26,6 +26,9 @@ const DragTableG8 byte = 6
 //DragTableGS is identifier for GL ballistic table
 const DragTableGS byte = 7
 
+//DragTableGC for a custom drag table
+const DragTableGC byte = 8
+
 type dragFunction func(float64) float64
 
 //
@@ -43,44 +46,76 @@ type dragFunction func(float64) float64
 //G1 and G7 are the most used for small arms ballistics
 //
 type BallisticCoefficient struct {
+	// value is the ballistic coefficient
 	value float64
+	// type of the value: BC or FF
+	valueType byte
+	// the identifier of the ballistic table
 	table byte
-	drag  dragFunction
+	// the drag function
+	drag dragFunction
 }
+
+//
+//BC is the type of the ballisic coefficient value: Ballicitic Coefficient
+//
+const BC = 1
+
+//
+//FF is the type of the ballisic coefficient value: Form Factor
+//
+const FF = 2
 
 func dragFunctionFactory(dragTable byte) dragFunction {
 	switch dragTable {
 	case DragTableG1:
 		return func(mach float64) float64 {
-			return calculateByCurve(g1Table, g1Curve, mach)
+			return CalculateByCurve(g1Table, g1Curve, mach)
 		}
 	case DragTableG2:
 		return func(mach float64) float64 {
-			return calculateByCurve(g2Table, g2Curve, mach)
+			return CalculateByCurve(g2Table, g2Curve, mach)
 		}
 	case DragTableG5:
 		return func(mach float64) float64 {
-			return calculateByCurve(g5Table, g5Curve, mach)
+			return CalculateByCurve(g5Table, g5Curve, mach)
 		}
 	case DragTableG6:
 		return func(mach float64) float64 {
-			return calculateByCurve(g6Table, g6Curve, mach)
+			return CalculateByCurve(g6Table, g6Curve, mach)
 		}
 	case DragTableG7:
 		return func(mach float64) float64 {
-			return calculateByCurve(g7Table, g7Curve, mach)
+			return CalculateByCurve(g7Table, g7Curve, mach)
 		}
 	case DragTableG8:
 		return func(mach float64) float64 {
-			return calculateByCurve(g8Table, g8Curve, mach)
+			return CalculateByCurve(g8Table, g8Curve, mach)
 		}
 	case DragTableGS:
 		return func(mach float64) float64 {
-			return calculateByCurve(gSTable, gSCurve, mach)
+			return CalculateByCurve(gSTable, gSCurve, mach)
 		}
 	default:
 		panic(fmt.Errorf("unknown drag table type"))
 	}
+}
+
+//CreateBallisticCoefficient creates ballistic coefficient object using the
+//the custom drag function
+func CreateBallisticCoefficientForCustomDragFunction(value float64, valueType byte, dragTable dragFunction) (BallisticCoefficient, error) {
+	if value <= 0 {
+		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: Drag coefficient must be greater than zero")
+	}
+	if valueType != BC && valueType != FF {
+		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: The value type must be either BC or FF")
+	}
+	return BallisticCoefficient{
+		value:     value,
+		valueType: valueType,
+		table:     DragTableGC,
+		drag:      dragTable,
+	}, nil
 }
 
 //CreateBallisticCoefficient creates ballistic coefficient object using the
@@ -93,9 +128,10 @@ func CreateBallisticCoefficient(value float64, dragTable byte) (BallisticCoeffic
 		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: Drag coefficient must be greater than zero")
 	}
 	return BallisticCoefficient{
-		value: value,
-		table: dragTable,
-		drag:  dragFunctionFactory(dragTable),
+		value:     value,
+		valueType: BC,
+		table:     dragTable,
+		drag:      dragFunctionFactory(dragTable),
 	}, nil
 }
 
@@ -104,15 +140,23 @@ func (v BallisticCoefficient) Value() float64 {
 	return v.value
 }
 
+//ValueType returns the ballistic coefficient value type (BC or FF)
+func (v BallisticCoefficient) ValueType() byte {
+	return v.valueType
+}
+
 //Table return the name of the ballistic table
 func (v BallisticCoefficient) Table() byte {
 	return v.table
 }
 
+//PIR = (PI/8)*(RHO0/144)
+const PIR = 2.08551e-04
+
 //Drag calculates the aerodynamic drag (deceleration factor) calculated for the speed
 //expressed in mach (speed of sound)
 func (v BallisticCoefficient) Drag(mach float64) float64 {
-	return v.drag(mach) * 2.08551e-04 / v.value
+	return v.drag(mach) * PIR
 }
 
 //DataPoint is one value of the ballistic table used in
@@ -212,7 +256,7 @@ var g1Table = []DataPoint{
 	{A: 5.00, B: 0.4988},
 }
 
-var g1Curve = calculateCurve(g1Table)
+var g1Curve = CalculateCurve(g1Table)
 
 var g7Table = []DataPoint{
 	{A: 0.00, B: 0.1198},
@@ -301,7 +345,7 @@ var g7Table = []DataPoint{
 	{A: 5.00, B: 0.1618},
 }
 
-var g7Curve = calculateCurve(g7Table)
+var g7Curve = CalculateCurve(g7Table)
 
 var g2Table = []DataPoint{
 	{A: 0.00, B: 0.2303},
@@ -391,7 +435,7 @@ var g2Table = []DataPoint{
 	{A: 5.00, B: 0.1648},
 }
 
-var g2Curve = calculateCurve(g2Table)
+var g2Curve = CalculateCurve(g2Table)
 
 var g5Table = []DataPoint{
 	{A: 0.00, B: 0.1710},
@@ -472,7 +516,7 @@ var g5Table = []DataPoint{
 	{A: 5.00, B: 0.2280},
 }
 
-var g5Curve = calculateCurve(g5Table)
+var g5Curve = CalculateCurve(g5Table)
 
 var g6Table = []DataPoint{
 	{A: 0.00, B: 0.2617},
@@ -556,7 +600,7 @@ var g6Table = []DataPoint{
 	{A: 5.00, B: 0.1574},
 }
 
-var g6Curve = calculateCurve(g6Table)
+var g6Curve = CalculateCurve(g6Table)
 
 var g8Table = []DataPoint{
 	{A: 0.00, B: 0.2105},
@@ -639,7 +683,7 @@ var g8Table = []DataPoint{
 	{A: 5.00, B: 0.1713},
 }
 
-var g8Curve = calculateCurve(g8Table)
+var g8Curve = CalculateCurve(g8Table)
 
 var gSTable = []DataPoint{
 	{A: 0.00, B: 0.4662},
@@ -725,9 +769,10 @@ var gSTable = []DataPoint{
 	{A: 4.00, B: 0.9280},
 }
 
-var gSCurve = calculateCurve(gSTable)
+var gSCurve = CalculateCurve(gSTable)
 
-func calculateCurve(dataPoints []DataPoint) []CurvePoint {
+//CalculateCurve calculates a curve for CalculateByCurve function using pretabulated or radar data
+func CalculateCurve(dataPoints []DataPoint) []CurvePoint {
 	var curve []CurvePoint
 	var numPoints = len(dataPoints)
 	var i int
@@ -750,17 +795,17 @@ func calculateCurve(dataPoints []DataPoint) []CurvePoint {
 		c = y1 - (a*x1*x1 + b*x1)
 		curve[i] = CurvePoint{A: a, B: b, C: c}
 	}
-	rate = (dataPoints[numPoints-1].B - dataPoints[numPoints-2].B) / (dataPoints[numPoints-1].A - dataPoints[numPoints-2].A)
-	curve[numPoints-1] = CurvePoint{0, rate, dataPoints[numPoints-1].B - dataPoints[numPoints-2].A*rate}
+	curve[numPoints-1] = CurvePoint{0, 0, dataPoints[numPoints-1].B}
 	return curve
 }
 
-func calculateByCurve(data []DataPoint, curve []CurvePoint, mach float64) float64 {
+//CalculateByCurve calculates a drag value using pretabulted or data data and curve created by CalculateCurve
+func CalculateByCurve(data []DataPoint, curve []CurvePoint, mach float64) float64 {
 	var numPoints, m, mlo, mhi, mid int
 
 	numPoints = len(curve)
 	mlo = 0
-	mhi = numPoints - 2
+	mhi = numPoints - 1
 
 	for (mhi - mlo) > 1 {
 		mid = int(math.Floor(float64(mhi+mlo) / 2.0))

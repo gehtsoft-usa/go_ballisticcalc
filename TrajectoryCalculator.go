@@ -74,6 +74,8 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 
 	zeroFindingError = cZeroFindingAccuracy * 2
 	var iterationsCount int
+	var bullet = ammunition.Bullet()
+	var ballisticFactor = 1 / bullet.GetBallisticCoefficient()
 
 	gravityVector = vector.Create(0, cGravityConstant, 0)
 	for zeroFindingError > cZeroFindingAccuracy && iterationsCount < cMaxIterations {
@@ -95,7 +97,7 @@ func (v TrajectoryCalculator) SightAngle(ammunition Ammunition, weapon Weapon, a
 
 			deltaTime = calculationStep / velocityVector.X
 			velocity = velocityVector.Magnitude()
-			drag = densityFactor * velocity * ammunition.Bullet().BallisticCoefficient().Drag(velocity/mach)
+			drag = ballisticFactor * densityFactor * velocity * bullet.BallisticCoefficient().Drag(velocity/mach)
 			velocityVector = velocityVector.Subtract((velocityVector.MultiplyByConst(drag).Subtract(gravityVector)).MultiplyByConst(deltaTime))
 			deltaRangeVector = vector.Create(calculationStep, velocityVector.Y*deltaTime, velocityVector.Z*deltaTime)
 			rangeVector = rangeVector.Add(deltaRangeVector)
@@ -178,6 +180,9 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		}
 	}
 
+	var bullet = ammunition.Bullet()
+	var ballisticFactor = 1 / bullet.GetBallisticCoefficient()
+
 	//run all the way down the range
 	for rangeVector.X <= maximumRange+calculationStep {
 		if velocity < cMinimumVelocity || rangeVector.Y < cMaximumDrop {
@@ -230,7 +235,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		deltaTime = calculationStep / velocityVector.X
 		velocityAdjusted = velocityVector.Subtract(windVector)
 		velocity = velocityAdjusted.Magnitude()
-		drag = densityFactor * velocity * ammunition.Bullet().BallisticCoefficient().Drag(velocity/mach)
+		drag = ballisticFactor * densityFactor * velocity * bullet.BallisticCoefficient().Drag(velocity/mach)
 		velocityVector = velocityVector.Subtract((velocityAdjusted.MultiplyByConst(drag).Subtract(gravityVector)).MultiplyByConst(deltaTime))
 		deltaRangeVector = vector.Create(calculationStep, velocityVector.Y*deltaTime, velocityVector.Z*deltaTime)
 		rangeVector = rangeVector.Add(deltaRangeVector)
