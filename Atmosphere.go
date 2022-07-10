@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import (
 	"fmt"
@@ -61,7 +61,6 @@ func CreateAtmosphere(altitude unit.Distance, pressure unit.Pressure, temperatur
 
 	a.calculate()
 	return a, nil
-
 }
 
 //CreateICAOAtmosphere creates default ICAO atmosphere for the specified altitude
@@ -85,9 +84,7 @@ func CreateICAOAtmosphere(altitude unit.Distance) Atmosphere {
 	}
 
 	a.calculate()
-
 	return a
-
 }
 
 //Altitude returns the ground level altitude over the sea level
@@ -148,7 +145,6 @@ func (a *Atmosphere) calculate0(t, p float64) (float64, float64) {
 	density = cStandardDensity * (cIcaoStandardTemperatureR / (t + cIcaoFreezingPointTemperatureR)) * hc
 	mach = math.Sqrt(t+cIcaoFreezingPointTemperatureR) * cSpeedOfSound
 	return density, mach
-
 }
 
 func (a *Atmosphere) calculate() {

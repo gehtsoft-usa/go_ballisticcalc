@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import (
 	"math"

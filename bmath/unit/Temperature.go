@@ -27,7 +27,6 @@ func temperatureToDefault(value float64, units byte) (float64, error) {
 	default:
 		return 0, fmt.Errorf("Temperature: unit %d is not supported", units)
 	}
-
 }
 
 func temperatureFromDefault(value float64, units byte) (float64, error) {
@@ -61,7 +60,6 @@ func CreateTemperature(value float64, units byte) (Temperature, error) {
 		return Temperature{}, err
 	}
 	return Temperature{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreateTemperature creates the temperature value but panics instead of returned a error
@@ -100,13 +98,12 @@ func (v Temperature) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 func (v Temperature) String() string {
 	x, e := temperatureFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -129,7 +126,6 @@ func (v Temperature) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

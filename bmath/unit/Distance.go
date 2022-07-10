@@ -63,7 +63,6 @@ func distanceToDefault(value float64, units byte) (float64, error) {
 	default:
 		return 0, fmt.Errorf("Distance: unit %d is not supported", units)
 	}
-
 }
 
 func distanceFromDefault(value float64, units byte) (float64, error) {
@@ -103,7 +102,6 @@ func CreateDistance(value float64, units byte) (Distance, error) {
 		return Distance{}, err
 	}
 	return Distance{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreateDistance creates the distance value but panics instead of returned a error
@@ -147,7 +145,7 @@ func (v Distance) In(units byte) float64 {
 func (v Distance) String() string {
 	x, e := distanceFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -188,7 +186,6 @@ func (v Distance) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

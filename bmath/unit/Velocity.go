@@ -67,7 +67,6 @@ func CreateVelocity(value float64, units byte) (Velocity, error) {
 		return Velocity{}, err
 	}
 	return Velocity{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreateVelocity creates the velocity value but panics instead of returned a error
@@ -106,13 +105,12 @@ func (v Velocity) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 func (v Velocity) String() string {
 	x, e := velocityFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -138,7 +136,6 @@ func (v Velocity) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

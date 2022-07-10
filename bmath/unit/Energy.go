@@ -46,7 +46,6 @@ func CreateEnergy(value float64, units byte) (Energy, error) {
 		return Energy{}, err
 	}
 	return Energy{value: v, defaultUnits: units}, nil
-
 }
 
 //MustCreateEnergy creates the energy value but panics instead of returned a error
@@ -85,13 +84,12 @@ func (v Energy) In(units byte) float64 {
 		return 0
 	}
 	return x
-
 }
 
 func (v Energy) String() string {
 	x, e := energyFromDefault(v.value, v.defaultUnits)
 	if e != nil {
-		return "!error: default units aren't correct"
+		return defaultUnitsError
 	}
 	var unitName, format string
 	var accuracy int
@@ -108,7 +106,6 @@ func (v Energy) String() string {
 	}
 	format = fmt.Sprintf("%%.%df%%s", accuracy)
 	return fmt.Sprintf(format, x, unitName)
-
 }
 
 //Units return the units in which the value is measured

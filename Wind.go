@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import "github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 
@@ -44,7 +44,6 @@ func CreateOnlyWindInfo(windVelocity unit.Velocity, direction unit.Angular) []Wi
 	a := make([]WindInfo, 1)
 	a[0] = w
 	return a
-
 }
 
 //AddWindInfo creates description of one wind

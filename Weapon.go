@@ -1,4 +1,4 @@
-package go_ballisticcalc
+package externalballistics
 
 import "github.com/gehtsoft-usa/go_ballisticcalc/bmath/unit"
 
@@ -53,7 +53,6 @@ func CreateZeroInfoWithAtmosphere(distance unit.Distance, atmosphere Atmosphere)
 		zeroAtmosphere: atmosphere,
 		zeroDistance:   distance,
 	}
-
 }
 
 //CreateZeroInfoWithAnotherAmmo creates zero information using distance and other ammunition
