@@ -254,7 +254,6 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 				dropAdjustment = getCorrection(rangeVector.X, drop)
 				windageAdjustment = getCorrection(rangeVector.X, windage)
 			}
-
 			ranges[currentItem] = TrajectoryData{
 				time:                     Timespan{time: time},
 				travelDistance:           unit.MustCreateDistance(distance, unit.DistanceFoot),
@@ -278,11 +277,10 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 			}
 		}
 
-		deltaTime = calculationStep / velocity
 		velocityAdjusted = velocityVector.Subtract(windVector)
 		velocity = velocityAdjusted.Magnitude()
+		deltaTime = calculationStep / velocity
 		drag = ballisticFactor * densityFactor * velocity * bullet.BallisticCoefficient().Drag(velocity/mach)
-
 		velocityVector = velocityVector.Subtract(velocityAdjusted.MultiplyByConst(drag * deltaTime).Subtract(gravityVector.MultiplyByConst(deltaTime)))
 
 		deltaRangeVector = vector.Create(velocityVector.X*deltaTime,
@@ -294,6 +292,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		alt += deltaRangeVector.Y
 		velocity = velocityVector.Magnitude()
 		time = time + deltaRangeVector.Magnitude()/velocity
+
 	}
 	return ranges
 }

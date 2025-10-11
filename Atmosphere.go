@@ -175,8 +175,8 @@ func (a *Atmosphere) getDensityFactorAndMachForAltitude(altitude float64) (float
 
 	ta = cIcaoStandardTemperatureR + orgAltitude*cTemperatureGradient - cIcaoFreezingPointTemperatureR
 	tb = cIcaoStandardTemperatureR + altitude*cTemperatureGradient - cIcaoFreezingPointTemperatureR
-	t = t0 + ta - tb
-	p = p * math.Pow(t0/t, cPressureExponent)
+	t = t0 - ta + tb
+	p = p * math.Pow((t0+cIcaoFreezingPointTemperatureR)/(t+cIcaoFreezingPointTemperatureR), cPressureExponent)
 
 	density, mach = a.calculate0(t, p)
 	return density / cStandardDensity, mach
