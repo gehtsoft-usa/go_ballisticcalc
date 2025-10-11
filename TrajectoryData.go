@@ -28,16 +28,20 @@ func (v Timespan) Minutes() float64 {
 
 //TrajectoryData structure keeps information about one point of the trajectory.
 type TrajectoryData struct {
-	time              Timespan
-	travelDistance    unit.Distance
-	velocity          unit.Velocity
-	mach              float64
-	drop              unit.Distance
-	dropAdjustment    unit.Angular
-	windage           unit.Distance
-	windageAdjustment unit.Angular
-	energy            unit.Energy
-	optimalGameWeight unit.Weight
+	time                      Timespan
+	travelDistance            unit.Distance
+	travelDistanceFlat        unit.Distance
+	velocity                  unit.Velocity
+	mach                      float64
+	drop                      unit.Distance
+	dropFlat                  unit.Distance
+	dropAdjustment            unit.Angular
+	windage                   unit.Distance
+	windageAdjustment         unit.Angular
+	lineOfSightElevation      unit.Distance
+	lineOfDepartureElevation  unit.Distance
+	energy                    unit.Energy
+	optimalGameWeight         unit.Weight
 }
 
 //Time return the amount of time spent since the shot moment
@@ -46,9 +50,14 @@ func (v TrajectoryData) Time() Timespan {
 }
 
 //TravelledDistance returns the distance measured between the muzzle and the projection of the current bullet position to
-//the line between the muzzle and the target
+//the line between the muzzle and the target (along line of sight)
 func (v TrajectoryData) TravelledDistance() unit.Distance {
 	return v.travelDistance
+}
+
+//TravelledDistanceFlat returns the distance traveled along surface from the muzzle
+func (v TrajectoryData) TravelledDistanceFlat() unit.Distance {
+	return v.travelDistanceFlat
 }
 
 //Velocity returns the current projectile velocity
@@ -61,12 +70,17 @@ func (v TrajectoryData) MachVelocity() float64 {
 	return v.mach
 }
 
-//Drop returns the shorted distance between the projectile and the shot line
+//Drop returns the shorted distance between the projectile and the shot line (relative to line of sight)
 //
 //The positive value means the the projectile is above this line and the negative value means that the projectile
 //is below this line
 func (v TrajectoryData) Drop() unit.Distance {
 	return v.drop
+}
+
+//DropFlat returns the drop relative to muzzle (vertical distance from muzzle level)
+func (v TrajectoryData) DropFlat() unit.Distance {
+	return v.dropFlat
 }
 
 //DropAdjustment returns the angle between the shot line and the line from the muzzle to the current projectile position
@@ -95,4 +109,14 @@ func (v TrajectoryData) Energy() unit.Energy {
 //probable with the kinetic energy that the projectile currently  have
 func (v TrajectoryData) OptimalGameWeight() unit.Weight {
 	return v.optimalGameWeight
+}
+
+//LineOfSightElevation returns the difference between the line of sight and the altitude of the muzzle
+func (v TrajectoryData) LineOfSightElevation() unit.Distance {
+	return v.lineOfSightElevation
+}
+
+//LineOfDepartureElevation returns the difference between the line of departure and the altitude of the muzzle
+func (v TrajectoryData) LineOfDepartureElevation() unit.Distance {
+	return v.lineOfDepartureElevation
 }

@@ -65,3 +65,21 @@ func CreateShotParameterUnlevel(sightAngle unit.Angular, maxDistance unit.Distan
 		step:            step,
 	}
 }
+
+//CreateShotParametersEx creates the parameter of the shot with extended parameters including shot angle and cant angle
+//
+//sightAngle - is the angle between scope centerline and the barrel centerline
+//
+//shotAngle - is the angle between lines drawn from the shooter to the target and the horizon. The positive angle
+//means that the target is higher and the negative angle means that the target is lower
+//
+//cantAngle - is the cant angle (the angle between centers of scope and the barrel projection and zenith line)
+func CreateShotParametersEx(sightAngle unit.Angular, maxDistance unit.Distance, step unit.Distance, shotAngle unit.Angular, cantAngle unit.Angular) ShotParameters {
+	return ShotParameters{
+		sightAngle:      sightAngle,
+		shotAngle:       shotAngle,
+		cantAngle:       cantAngle,
+		maximumDistance: maxDistance,
+		step:            step,
+	}
+}

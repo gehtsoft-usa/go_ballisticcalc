@@ -29,6 +29,9 @@ const DragTableGS byte = 7
 //DragTableGC for a custom drag table
 const DragTableGC byte = 8
 
+//DragTableRA4 is identifier for RA4 ballistic table
+const DragTableRA4 byte = 9
+
 type dragFunction func(float64) float64
 
 //
@@ -96,6 +99,10 @@ func dragFunctionFactory(dragTable byte) dragFunction {
 		return func(mach float64) float64 {
 			return CalculateByCurve(gSTable, gSCurve, mach)
 		}
+	case DragTableRA4:
+		return func(mach float64) float64 {
+			return CalculateByCurve(ra4Table, ra4Curve, mach)
+		}
 	default:
 		panic(fmt.Errorf("unknown drag table type"))
 	}
@@ -121,7 +128,7 @@ func CreateBallisticCoefficientForCustomDragFunction(value float64, valueType by
 //CreateBallisticCoefficient creates ballistic coefficient object using the
 //ballistic coefficient value and ballistic table.
 func CreateBallisticCoefficient(value float64, dragTable byte) (BallisticCoefficient, error) {
-	if dragTable < DragTableG1 || DragTableG1 > DragTableGS {
+	if dragTable < DragTableG1 || dragTable > DragTableRA4 {
 		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: Unknown drag table %d", dragTable)
 	}
 	if value <= 0 {
@@ -770,6 +777,98 @@ var gSTable = []DataPoint{
 }
 
 var gSCurve = CalculateCurve(gSTable)
+
+var ra4Table = []DataPoint{
+	{A: 0.000, B: 0.2283},
+	{A: 0.050, B: 0.2283},
+	{A: 0.100, B: 0.2282},
+	{A: 0.150, B: 0.2281},
+	{A: 0.200, B: 0.2281},
+	{A: 0.250, B: 0.2281},
+	{A: 0.300, B: 0.2281},
+	{A: 0.350, B: 0.2281},
+	{A: 0.400, B: 0.2281},
+	{A: 0.450, B: 0.2281},
+	{A: 0.500, B: 0.2281},
+	{A: 0.550, B: 0.2281},
+	{A: 0.600, B: 0.2281},
+	{A: 0.650, B: 0.2281},
+	{A: 0.700, B: 0.2288},
+	{A: 0.725, B: 0.2296},
+	{A: 0.750, B: 0.2307},
+	{A: 0.775, B: 0.2320},
+	{A: 0.800, B: 0.2334},
+	{A: 0.825, B: 0.2359},
+	{A: 0.850, B: 0.2389},
+	{A: 0.875, B: 0.2480},
+	{A: 0.900, B: 0.2604},
+	{A: 0.925, B: 0.2819},
+	{A: 0.950, B: 0.3111},
+	{A: 0.975, B: 0.3496},
+	{A: 1.000, B: 0.3975},
+	{A: 1.025, B: 0.4530},
+	{A: 1.050, B: 0.5010},
+	{A: 1.075, B: 0.5476},
+	{A: 1.100, B: 0.5719},
+	{A: 1.125, B: 0.5895},
+	{A: 1.150, B: 0.5943},
+	{A: 1.175, B: 0.5933},
+	{A: 1.200, B: 0.5881},
+	{A: 1.225, B: 0.5810},
+	{A: 1.250, B: 0.5736},
+	{A: 1.275, B: 0.5690},
+	{A: 1.300, B: 0.5651},
+	{A: 1.325, B: 0.5629},
+	{A: 1.350, B: 0.5609},
+	{A: 1.375, B: 0.5591},
+	{A: 1.400, B: 0.5575},
+	{A: 1.425, B: 0.5558},
+	{A: 1.450, B: 0.5543},
+	{A: 1.475, B: 0.5527},
+	{A: 1.500, B: 0.5513},
+	{A: 1.525, B: 0.5499},
+	{A: 1.550, B: 0.5485},
+	{A: 1.575, B: 0.5472},
+	{A: 1.600, B: 0.5460},
+	{A: 1.625, B: 0.5449},
+	{A: 1.650, B: 0.5438},
+	{A: 1.675, B: 0.5428},
+	{A: 1.700, B: 0.5419},
+	{A: 1.725, B: 0.5410},
+	{A: 1.750, B: 0.5401},
+	{A: 1.775, B: 0.5393},
+	{A: 1.800, B: 0.5385},
+	{A: 1.825, B: 0.5377},
+	{A: 1.850, B: 0.5369},
+	{A: 1.875, B: 0.5361},
+	{A: 1.900, B: 0.5354},
+	{A: 1.925, B: 0.5346},
+	{A: 1.950, B: 0.5338},
+	{A: 2.000, B: 0.5323},
+	{A: 2.100, B: 0.5294},
+	{A: 2.200, B: 0.5267},
+	{A: 2.300, B: 0.5240},
+	{A: 2.400, B: 0.5216},
+	{A: 2.500, B: 0.5193},
+	{A: 2.600, B: 0.5170},
+	{A: 2.650, B: 0.5160},
+	{A: 2.700, B: 0.5149},
+	{A: 2.800, B: 0.5129},
+	{A: 2.900, B: 0.5109},
+	{A: 3.000, B: 0.5091},
+	{A: 3.100, B: 0.5074},
+	{A: 3.200, B: 0.5058},
+	{A: 3.300, B: 0.5043},
+	{A: 3.400, B: 0.5029},
+	{A: 3.500, B: 0.5017},
+	{A: 3.600, B: 0.5006},
+	{A: 3.700, B: 0.4995},
+	{A: 3.800, B: 0.4986},
+	{A: 3.900, B: 0.4977},
+	{A: 4.000, B: 0.4969},
+}
+
+var ra4Curve = CalculateCurve(ra4Table)
 
 //CalculateCurve calculates a curve for CalculateByCurve function using pretabulated or radar data
 func CalculateCurve(dataPoints []DataPoint) []CurvePoint {

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/d/develop/components/BusinessSpecificComponents/BallisticCalculator.Net/**)",
+      "Bash(go test:*)",
+      "Bash(1)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
