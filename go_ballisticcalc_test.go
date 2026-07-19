@@ -80,55 +80,11 @@ func validateOneImperial(t *testing.T, data externalballistics.TrajectoryData,
     }
 }
 
-func TestPathG1(t *testing.T) {
-    bc, _ := externalballistics.CreateBallisticCoefficient(0.223, externalballistics.DragTableG1)
-    projectile := externalballistics.CreateProjectile(bc, unit.MustCreateWeight(168, unit.WeightGrain))
-    ammo := externalballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
-    zero := externalballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-    weapon := externalballistics.CreateWeapon(unit.MustCreateDistance(2, unit.DistanceInch), zero)
-    atmosphere := externalballistics.CreateDefaultAtmosphere()
-    shotInfo := externalballistics.CreateShotParameters(unit.MustCreateAngular(0.001228, unit.AngularRadian),
-        unit.MustCreateDistance(1000, unit.DistanceYard),
-        unit.MustCreateDistance(100, unit.DistanceYard))
-    wind := externalballistics.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
-        unit.MustCreateAngular(-45, unit.AngularDegree))
-
-    calc := externalballistics.CreateTrajectoryCalculator()
-    data := calc.Trajectory(ammo, weapon, atmosphere, shotInfo, wind)
-
-    assertEqual(t, float64(len(data)), 11, 0.1, "Length")
-
-    validateOneImperial(t, data[0], 0, 2750, 2.463, 2820.6, -2, 0, 0, 0, 0, 880, unit.AngularMOA)
-    validateOneImperial(t, data[1], 100, 2351.2, 2.106, 2061, 0, 0, -0.6, -0.6, 0.118, 550, unit.AngularMOA)
-    validateOneImperial(t, data[5], 500, 1169.1, 1.047, 509.8, -87.9, -16.8, -19.5, -3.7, 0.857, 67, unit.AngularMOA)
-    validateOneImperial(t, data[10], 1000, 776.4, 0.695, 224.9, -823.9, -78.7, -87.5, -8.4, 2.495, 20, unit.AngularMOA)
-}
-
-func TestPathG7(t *testing.T) {
-    bc, _ := externalballistics.CreateBallisticCoefficient(0.223, externalballistics.DragTableG7)
-    projectile := externalballistics.CreateProjectileWithDimensions(bc, unit.MustCreateDistance(0.308, unit.DistanceInch),
-        unit.MustCreateDistance(1.282, unit.DistanceInch), unit.MustCreateWeight(168, unit.WeightGrain))
-    ammo := externalballistics.CreateAmmunition(projectile, unit.MustCreateVelocity(2750, unit.VelocityFPS))
-    zero := externalballistics.CreateZeroInfo(unit.MustCreateDistance(100, unit.DistanceYard))
-    twist := externalballistics.CreateTwist(externalballistics.TwistRight, unit.MustCreateDistance(11.24, unit.DistanceInch))
-    weapon := externalballistics.CreateWeaponWithTwist(unit.MustCreateDistance(2, unit.DistanceInch), zero, twist)
-    atmosphere := externalballistics.CreateDefaultAtmosphere()
-    shotInfo := externalballistics.CreateShotParameters(unit.MustCreateAngular(4.221, unit.AngularMOA),
-        unit.MustCreateDistance(1000, unit.DistanceYard),
-        unit.MustCreateDistance(100, unit.DistanceYard))
-    wind := externalballistics.CreateOnlyWindInfo(unit.MustCreateVelocity(5, unit.VelocityMPH),
-        unit.MustCreateAngular(-45, unit.AngularDegree))
-
-    calc := externalballistics.CreateTrajectoryCalculator()
-    data := calc.Trajectory(ammo, weapon, atmosphere, shotInfo, wind)
-
-    assertEqual(t, float64(len(data)), 11, 0.1, "Length")
-
-    validateOneImperial(t, data[0], 0, 2750, 2.463, 2820.6, -2, 0, 0, 0, 0, 880, unit.AngularMil)
-    validateOneImperial(t, data[1], 100, 2544.3, 2.279, 2416, 0, 0, -0.35, -0.09, 0.113, 698, unit.AngularMil)
-    validateOneImperial(t, data[5], 500, 1810.7, 1.622, 1226, -56.3, -3.18, -9.96, -0.55, 0.673, 252, unit.AngularMil)
-    validateOneImperial(t, data[10], 1000, 1081.3, 0.968, 442, -401.6, -11.32, -50.98, -1.44, 1.748, 55, unit.AngularMil)
-}
+// The G1 and G7 path regression tests moved to TestTrajectoryTemplates (trajectory_test.go), which
+// runs the same resource templates and accuracy tolerances as the .NET TrajectoryCalculatorTest.
+// The old bespoke .308/168gr cases had no corresponding .NET template and encoded the pre-SI
+// (imperial) density model, so they could not be validated against .NET once the SI density model
+// (matching .NET) was adopted.
 
 func TestAmmunictionReturnBC(t *testing.T) {
     bc, _ := externalballistics.CreateBallisticCoefficient(0.223, externalballistics.DragTableG7)

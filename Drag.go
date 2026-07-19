@@ -108,6 +108,31 @@ func dragFunctionFactory(dragTable byte) dragFunction {
 	}
 }
 
+//standardDragTable returns the raw (Mach, drag coefficient) data points of a standard drag table.
+//It rejects the GC custom-table id, which has no built-in data.
+func standardDragTable(dragTable byte) ([]DataPoint, error) {
+	switch dragTable {
+	case DragTableG1:
+		return g1Table, nil
+	case DragTableG2:
+		return g2Table, nil
+	case DragTableG5:
+		return g5Table, nil
+	case DragTableG6:
+		return g6Table, nil
+	case DragTableG7:
+		return g7Table, nil
+	case DragTableG8:
+		return g8Table, nil
+	case DragTableGS:
+		return gSTable, nil
+	case DragTableRA4:
+		return ra4Table, nil
+	default:
+		return nil, fmt.Errorf("standardDragTable: unknown or unsupported drag table %d", dragTable)
+	}
+}
+
 //CreateBallisticCoefficient creates ballistic coefficient object using the
 //the custom drag function
 func CreateBallisticCoefficientForCustomDragFunction(value float64, valueType byte, dragTable dragFunction) (BallisticCoefficient, error) {
@@ -128,6 +153,9 @@ func CreateBallisticCoefficientForCustomDragFunction(value float64, valueType by
 //CreateBallisticCoefficient creates ballistic coefficient object using the
 //ballistic coefficient value and ballistic table.
 func CreateBallisticCoefficient(value float64, dragTable byte) (BallisticCoefficient, error) {
+	if dragTable == DragTableGC {
+		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: the GC custom drag table requires data points; use BuildDrgDragTable/CreateDrgDragTable or CreateBallisticCoefficientForCustomDragFunction")
+	}
 	if dragTable < DragTableG1 || dragTable > DragTableRA4 {
 		return BallisticCoefficient{}, fmt.Errorf("BallisticCoefficient: Unknown drag table %d", dragTable)
 	}

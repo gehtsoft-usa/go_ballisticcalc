@@ -12,6 +12,7 @@ const cMinimumVelocity float64 = 50.0
 const cMaximumDrop float64 = -15000
 const cMaxIterations int = 10
 const cGravityConstant float64 = 32.17405
+const cCoriolisOmega float64 = 7.2921159e-5 // Earth rotation rate, rad/s (§1.7)
 
 // TrajectoryCalculator table is used to calculate the trajectory of a projectile shot with the parameters specified
 type TrajectoryCalculator struct {
@@ -49,7 +50,11 @@ func (v TrajectoryCalculator) getCalculationStep(step float64) float64 {
 // CreateTrajectoryCalculator creates and instance of the trajectory calculator
 func CreateTrajectoryCalculator() TrajectoryCalculator {
 	return TrajectoryCalculator{
-		maximumCalculatorStepSize: unit.MustCreateDistance(1, unit.DistanceFoot),
+		// 0.1 m matches the .NET engine's default (MaximumCalculationStepSize). The old 1 ft default
+		// made the derived integration step ~10x coarser at a 50 yd output step (getCalculationStep's
+		// log10 flooring is scale-sensitive), which overshot reported distances and cost long-range
+		// accuracy relative to .NET.
+		maximumCalculatorStepSize: unit.MustCreateDistance(0.1, unit.DistanceMeter),
 	}
 }
 
@@ -195,6 +200,23 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	var bullet = ammunition.Bullet()
 	var ballisticFactor = 1 / bullet.GetBallisticCoefficient()
 
+	// §1.7 Coriolis / Eötvös: closed-form per-output-point corrections (Earth rotation), applied only
+	// when a latitude is provided. Time-of-flight, velocity and range are untouched. Azimuth is a pure
+	// scalar here (0° = North, clockwise → 90° = East); it does not tilt the muzzle vector.
+	var coriolis = shotInfo.HasLatitude()
+	var coriolisHCoef float64
+	var coriolisVRatio = 1.0
+	if coriolis {
+		var sinLat = math.Sin(shotInfo.Latitude().In(unit.AngularRadian))
+		var cosLat = math.Cos(shotInfo.Latitude().In(unit.AngularRadian))
+		var azSin = math.Sin(shotInfo.Azimuth().In(unit.AngularRadian))
+		// Horizontal (windage) coefficient, azimuth-independent (sign carried by sin(latitude)).
+		coriolisHCoef = cCoriolisOmega * sinLat
+		// Vertical Eötvös as a gravity ratio g_eff/g (dimensionless). muzzleVelocity is fps and
+		// cGravityConstant is ft/s², so muzzleVelocity/cGravityConstant is seconds — units cancel.
+		coriolisVRatio = 1.0 - 2.0*cCoriolisOmega*cosLat*azSin*muzzleVelocity/cGravityConstant
+	}
+
 	// Cache atmosphere calculations - only update when altitude changes by > 1 meter
 	var altDelta = 3.28084             // 1 meter in feet
 	var lastAtAltitude = -3280839895.0 // -1000000000 meters in feet
@@ -205,7 +227,9 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 	lastAtAltitude = alt
 
 	//run all the way down the range
-	for distance <= maximumRange+calculationStep {
+	// §1.3: `distance` is the line-of-sight (slant) distance rangeVector.X/cos(losAngle), so the
+	// one-step end margin must be in the same frame or steep shots stop one output step early.
+	for distance <= maximumRange+calculationStep/lineOfSightCos {
 		if velocity < cMinimumVelocity || rangeVector.Y < cMaximumDrop {
 			break
 		}
@@ -230,7 +254,9 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		if distance >= nextRangeDistance {
 			var windage = rangeVector.Z
 			if calculateDrift {
-				windage += (1.25 * (stabilityCoefficient + 1.2) * math.Pow(time, 1.83) * twistCoefficient) / 12.0
+				// §1.5: spin drift is horizontal; on an inclined shot only its cos-projection lies
+				// in the reported windage plane, hence the * lineOfSightCos factor.
+				windage += (1.25 * (stabilityCoefficient + 1.2) * math.Pow(time, 1.83) * twistCoefficient) / 12.0 * lineOfSightCos
 			}
 
 			// Calculate line of sight and line of departure elevations
@@ -238,14 +264,31 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 			var lineOfSightElevation = rangeVector.X * lineOfSightTan
 			var lineOfDepartureElevation = rangeVector.X*lineOfDepartureTan - sightHeight
 
+			// §1.7 Coriolis / Eötvös. Horizontal deflects right in the N hemisphere; our windage is
+			// left +/right − so subtract. Eötvös modifies gravity, which acts only on the gravitational
+			// fall below the vacuum bore line (== lineOfDepartureElevation), so scale that fall by
+			// g_eff/g and rebuild; the bore line (hence the exact −sightHeight muzzle drop where the
+			// fall is 0) is left untouched. The integrator state (rangeVector.Y) is never mutated.
+			var ryEffective = rangeVector.Y
+			if coriolis {
+				windage -= coriolisHCoef * distance * time
+				var boreLine = lineOfDepartureElevation
+				ryEffective = boreLine + (rangeVector.Y-boreLine)*coriolisVRatio
+			}
+
 			// Calculate drop and adjustments
-			var drop = rangeVector.Y
+			var drop = ryEffective
+			var dropFlat = ryEffective
 			var dropAdjustment float64
 			var windageAdjustment float64
 
-			// If shot angle is present, rotate coordinates to account for incline/decline
+			// If shot angle is present, rotate coordinates to account for incline/decline.
+			// §1.6 (intentional quirk — do NOT "simplify"): sightHeight is added in the vertical
+			// frame but subtracted back in the rotated frame; the residual sightHeight*(cos-1)
+			// deliberately pins the muzzle drop to exactly -sightHeight while every downrange point
+			// uses the true perpendicular rotation.
 			if hasShotAngle {
-				var y = rangeVector.Y + sightHeight
+				var y = ryEffective + sightHeight
 				var yRotated = -rangeVector.X*lineOfSightSin + y*lineOfSightCos
 				drop = yRotated - sightHeight
 				dropAdjustment = getCorrection(distance, drop)
@@ -259,7 +302,7 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 				travelDistance:           unit.MustCreateDistance(distance, unit.DistanceFoot),
 				travelDistanceFlat:       unit.MustCreateDistance(rangeVector.X, unit.DistanceFoot),
 				drop:                     unit.MustCreateDistance(drop, unit.DistanceFoot),
-				dropFlat:                 unit.MustCreateDistance(rangeVector.Y, unit.DistanceFoot),
+				dropFlat:                 unit.MustCreateDistance(dropFlat, unit.DistanceFoot),
 				dropAdjustment:           unit.MustCreateAngular(dropAdjustment, unit.AngularRadian),
 				lineOfSightElevation:     unit.MustCreateDistance(lineOfSightElevation, unit.DistanceFoot),
 				lineOfDepartureElevation: unit.MustCreateDistance(lineOfDepartureElevation, unit.DistanceFoot),
@@ -291,7 +334,9 @@ func (v TrajectoryCalculator) Trajectory(ammunition Ammunition, weapon Weapon, a
 		distance = rangeVector.X / lineOfSightCos // Calculate slant distance
 		alt += deltaRangeVector.Y
 		velocity = velocityVector.Magnitude()
-		time = time + deltaRangeVector.Magnitude()/velocity
+		// §1.4: reported flight time is the sum of the integration timesteps, not re-derived from
+		// displacement/speed (which diverges on angled shots). deltaTime is this step's dt.
+		time = time + deltaTime
 
 	}
 	return ranges
